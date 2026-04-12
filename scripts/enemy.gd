@@ -10,7 +10,7 @@ class_name EnemyUnit
 @export var deaggro_range: float = 120.0
 
 var health: float
-var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
+var gravity: float = float(ProjectSettings.get_setting("physics/3d/default_gravity"))
 var target: PlayerController
 var _attack_cd := 0.0
 var _external_knockback: Vector3 = Vector3.ZERO

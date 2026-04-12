@@ -34,7 +34,7 @@ signal player_died
 @onready var camera: Camera3D = $Pivot/Camera3D
 @onready var body_mesh: MeshInstance3D = $BodyMesh
 
-var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
+var gravity: float = float(ProjectSettings.get_setting("physics/3d/default_gravity"))
 var health: float
 var kill_count: int = 0
 
@@ -138,13 +138,14 @@ func _try_knife_attack() -> void:
 	params.collide_with_areas = false
 	params.collide_with_bodies = true
 	params.exclude = [self]
-	var hits := get_world_3d().direct_space_state.intersect_shape(params, 64)
-	for hit in hits:
-		var collider := hit.collider
-		if collider and collider.is_in_group("enemy"):
-			var to_target := collider.global_transform.origin - global_transform.origin
+	var hits: Array[Dictionary] = get_world_3d().direct_space_state.intersect_shape(params, 64)
+	for hit_data: Dictionary in hits:
+		var collider_obj: Object = hit_data.get("collider") as Object
+		var enemy := collider_obj as EnemyUnit
+		if enemy:
+			var to_target := enemy.global_transform.origin - global_transform.origin
 			if to_target.normalized().dot(-global_transform.basis.z) > 0.1:
-				collider.take_damage(knife_damage, to_target.normalized() * knife_knockback)
+				enemy.take_damage(knife_damage, to_target.normalized() * knife_knockback)
 
 func _try_dash() -> void:
 	if _dash_cooldown_timer > 0.0 or _dash_timer > 0.0 or not _alive:
@@ -162,16 +163,17 @@ func _apply_dash_hits() -> void:
 	params.collide_with_areas = false
 	params.collide_with_bodies = true
 	params.exclude = [self]
-	var hits := get_world_3d().direct_space_state.intersect_shape(params, 24)
-	for hit in hits:
-		var collider := hit.collider
-		if collider and collider.is_in_group("enemy"):
-			var id := collider.get_instance_id()
+	var hits: Array[Dictionary] = get_world_3d().direct_space_state.intersect_shape(params, 24)
+	for hit_data: Dictionary in hits:
+		var collider_obj: Object = hit_data.get("collider") as Object
+		var enemy := collider_obj as EnemyUnit
+		if enemy:
+			var id := enemy.get_instance_id()
 			if _dash_hits.has(id):
 				continue
 			_dash_hits[id] = true
-			var push := (collider.global_transform.origin - global_transform.origin).normalized()
-			collider.take_damage(dash_damage, push * dash_knockback)
+			var push := (enemy.global_transform.origin - global_transform.origin).normalized()
+			enemy.take_damage(dash_damage, push * dash_knockback)
 
 func _try_stealth() -> void:
 	if _stealth_cooldown_timer > 0.0 or _stealth_timer > 0.0 or not _alive:
