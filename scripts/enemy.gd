@@ -1,7 +1,7 @@
 extends CharacterBody3D
 class_name EnemyUnit
 
-@export var max_health: float = 60.0
+@export var max_health: float = 100.0
 @export var move_speed: float = 5.2
 @export var acceleration: float = 16.0
 @export var touch_damage: float = 8.0

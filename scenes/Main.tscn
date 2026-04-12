@@ -97,6 +97,107 @@ shape = SubResource("BoxShape3D_obstacle")
 mesh = SubResource("BoxMesh_obstacle")
 material_override = SubResource("StandardMaterial3D_obstacle")
 
+
+[node name="ObstacleE" type="StaticBody3D" parent="Arena"]
+position = Vector3(-28, 1, 6)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Arena/ObstacleE"]
+shape = SubResource("BoxShape3D_obstacle")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Arena/ObstacleE"]
+mesh = SubResource("BoxMesh_obstacle")
+material_override = SubResource("StandardMaterial3D_obstacle")
+
+[node name="ObstacleF" type="StaticBody3D" parent="Arena"]
+position = Vector3(-22, 1, 18)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Arena/ObstacleF"]
+shape = SubResource("BoxShape3D_obstacle")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Arena/ObstacleF"]
+mesh = SubResource("BoxMesh_obstacle")
+material_override = SubResource("StandardMaterial3D_obstacle")
+
+[node name="ObstacleG" type="StaticBody3D" parent="Arena"]
+position = Vector3(-12, 1, -24)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Arena/ObstacleG"]
+shape = SubResource("BoxShape3D_obstacle")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Arena/ObstacleG"]
+mesh = SubResource("BoxMesh_obstacle")
+material_override = SubResource("StandardMaterial3D_obstacle")
+
+[node name="ObstacleH" type="StaticBody3D" parent="Arena"]
+position = Vector3(2, 1, -10)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Arena/ObstacleH"]
+shape = SubResource("BoxShape3D_obstacle")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Arena/ObstacleH"]
+mesh = SubResource("BoxMesh_obstacle")
+material_override = SubResource("StandardMaterial3D_obstacle")
+
+[node name="ObstacleI" type="StaticBody3D" parent="Arena"]
+position = Vector3(8, 1, -28)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Arena/ObstacleI"]
+shape = SubResource("BoxShape3D_obstacle")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Arena/ObstacleI"]
+mesh = SubResource("BoxMesh_obstacle")
+material_override = SubResource("StandardMaterial3D_obstacle")
+
+[node name="ObstacleJ" type="StaticBody3D" parent="Arena"]
+position = Vector3(16, 1, 2)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Arena/ObstacleJ"]
+shape = SubResource("BoxShape3D_obstacle")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Arena/ObstacleJ"]
+mesh = SubResource("BoxMesh_obstacle")
+material_override = SubResource("StandardMaterial3D_obstacle")
+
+[node name="ObstacleK" type="StaticBody3D" parent="Arena"]
+position = Vector3(24, 1, 20)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Arena/ObstacleK"]
+shape = SubResource("BoxShape3D_obstacle")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Arena/ObstacleK"]
+mesh = SubResource("BoxMesh_obstacle")
+material_override = SubResource("StandardMaterial3D_obstacle")
+
+[node name="ObstacleL" type="StaticBody3D" parent="Arena"]
+position = Vector3(30, 1, -8)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Arena/ObstacleL"]
+shape = SubResource("BoxShape3D_obstacle")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Arena/ObstacleL"]
+mesh = SubResource("BoxMesh_obstacle")
+material_override = SubResource("StandardMaterial3D_obstacle")
+
+[node name="ObstacleM" type="StaticBody3D" parent="Arena"]
+position = Vector3(-2, 1, 30)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Arena/ObstacleM"]
+shape = SubResource("BoxShape3D_obstacle")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Arena/ObstacleM"]
+mesh = SubResource("BoxMesh_obstacle")
+material_override = SubResource("StandardMaterial3D_obstacle")
+
+[node name="ObstacleN" type="StaticBody3D" parent="Arena"]
+position = Vector3(-30, 1, -18)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Arena/ObstacleN"]
+shape = SubResource("BoxShape3D_obstacle")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Arena/ObstacleN"]
+mesh = SubResource("BoxMesh_obstacle")
+material_override = SubResource("StandardMaterial3D_obstacle")
+
 [node name="Player" parent="." instance=ExtResource("1_v7f8v")]
 position = Vector3(0, 2, 0)
 

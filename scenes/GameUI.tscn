@@ -46,15 +46,33 @@ layout_mode = 2
 offset_top = 40.0
 theme_override_constants/separation = 12
 
+[node name="DashLabel" type="Label" parent="HUD/Margin/AbilityRow"]
+layout_mode = 2
+text = "Dash"
+
 [node name="DashCooldown" type="ProgressBar" parent="HUD/Margin/AbilityRow"]
 layout_mode = 2
-custom_minimum_size = Vector2(220, 18)
+custom_minimum_size = Vector2(180, 18)
 value = 100.0
 show_percentage = false
 
+[node name="KnifeLabel" type="Label" parent="HUD/Margin/AbilityRow"]
+layout_mode = 2
+text = "Knife"
+
+[node name="KnifeCooldown" type="ProgressBar" parent="HUD/Margin/AbilityRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(180, 18)
+value = 100.0
+show_percentage = false
+
+[node name="StealthLabel" type="Label" parent="HUD/Margin/AbilityRow"]
+layout_mode = 2
+text = "Stealth"
+
 [node name="StealthCooldown" type="ProgressBar" parent="HUD/Margin/AbilityRow"]
 layout_mode = 2
-custom_minimum_size = Vector2(220, 18)
+custom_minimum_size = Vector2(180, 18)
 value = 100.0
 show_percentage = false
 
@@ -87,7 +105,7 @@ offset_left = 14.0
 offset_top = -128.0
 offset_right = 860.0
 offset_bottom = -12.0
-text = "WASD Move | Mouse Look | LMB Knife (one-hit + multi-hit) | Shift Dash | E Stealth | Space Double Jump | R Restart"
+text = "WASD Move | Mouse Look | Hold LMB Knife | Shift Dash | E Stealth | Space Double Jump | R Restart"
 [node name="GameOver" type="PanelContainer" parent="."]
 visible = false
 anchors_preset = 8
