@@ -21,6 +21,7 @@ func _ready() -> void:
 
 func _physics_process(delta: float) -> void:
 	_attack_cd = max(_attack_cd - delta, 0.0)
+
 	if not is_on_floor():
 		velocity.y -= gravity * delta
 	else:
@@ -38,21 +39,25 @@ func _physics_process(delta: float) -> void:
 		move_and_slide()
 		return
 
-	var to_player := target.global_transform.origin - global_transform.origin
-	var planar := Vector3(to_player.x, 0.0, to_player.z)
-	var dist := planar.length()
+	var to_player: Vector3 = target.global_transform.origin - global_transform.origin
+	var planar: Vector3 = Vector3(to_player.x, 0.0, to_player.z)
+	var dist: float = planar.length()
+
 	if dist > deaggro_range:
 		queue_free()
 		return
+
 	if dist < detection_range:
-		var dir := planar.normalized() if dist > 0.001 else Vector3.ZERO
+		var dir: Vector3 = planar.normalized() if dist > 0.001 else Vector3.ZERO
 		velocity.x = move_toward(velocity.x, dir.x * move_speed + _external_knockback.x, acceleration * delta)
 		velocity.z = move_toward(velocity.z, dir.z * move_speed + _external_knockback.z, acceleration * delta)
 		look_at(global_transform.origin + dir, Vector3.UP)
-		var vertical_gap := abs(to_player.y)
+
+		var vertical_gap: float = absf(to_player.y)
 		if dist <= 1.65 and vertical_gap <= 1.1 and _attack_cd <= 0.0:
 			_attack_cd = attack_interval
 			target.take_damage(touch_damage)
+
 	_external_knockback = _external_knockback.move_toward(Vector3.ZERO, 24.0 * delta)
 	move_and_slide()
 
@@ -61,5 +66,5 @@ func take_damage(amount: float, knockback: Vector3 = Vector3.ZERO) -> void:
 	_external_knockback += Vector3(knockback.x, 0.0, knockback.z)
 	if health <= 0.0:
 		if target and is_instance_valid(target):
-			target.on_enemy_killed()
+			target.register_kill()
 		queue_free()
