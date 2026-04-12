@@ -3,7 +3,7 @@ class_name PlayerController
 
 signal health_changed(current: float, max_health: float)
 signal kill_count_changed(value: int)
-signal cooldowns_changed(dash_ratio: float, stealth_ratio: float, stealth_active: bool)
+signal cooldowns_changed(dash_ratio: float, knife_ratio: float, stealth_ratio: float, stealth_active: bool)
 signal player_died
 
 @export var max_health: float = 100.0
@@ -14,7 +14,7 @@ signal player_died
 @export var max_air_jumps: int = 1
 @export var mouse_sensitivity: float = 0.003
 
-@export var knife_damage: float = 120.0
+@export var knife_damage: float = 34.0
 @export var knife_range: float = 3.2
 @export var knife_radius: float = 2.1
 @export var knife_cooldown: float = 0.24
@@ -23,9 +23,9 @@ signal player_died
 @export var dash_speed: float = 38.0
 @export var dash_duration: float = 0.18
 @export var dash_cooldown: float = 1.8
-@export var dash_damage: float = 26.0
+@export var dash_damage: float = 70.0
 @export var dash_knockback: float = 16.0
-@export var dash_hit_radius: float = 1.3
+@export var dash_hit_radius: float = 1.8
 
 @export var stealth_duration: float = 3.8
 @export var stealth_cooldown: float = 11.0
@@ -47,6 +47,7 @@ var _knife_timer := 0.0
 var _dash_timer := 0.0
 var _dash_cooldown_timer := 0.0
 var _dash_hits: Dictionary = {}
+var _dash_prev_origin: Vector3 = Vector3.ZERO
 var _dash_key_was_down := false
 
 var _stealth_timer := 0.0
@@ -76,7 +77,7 @@ func _physics_process(delta: float) -> void:
 	_update_timers(delta)
 	_update_stealth_visuals()
 
-	if Input.is_action_just_pressed("attack"):
+	if Input.is_action_pressed("attack"):
 		_try_knife_attack()
 	var shift_down := Input.is_key_pressed(KEY_SHIFT)
 	if Input.is_action_just_pressed("dash") or (shift_down and not _dash_key_was_down):
@@ -107,12 +108,16 @@ func _physics_process(delta: float) -> void:
 			velocity.y = jump_velocity * 0.95
 
 	if _dash_timer > 0.0:
+		_dash_prev_origin = global_transform.origin
 		var dash_dir := -transform.basis.z
 		velocity.x = dash_dir.x * dash_speed
 		velocity.z = dash_dir.z * dash_speed
 		_apply_dash_hits()
 
 	move_and_slide()
+
+	if _dash_timer > 0.0:
+		_apply_dash_hits()
 
 func _process(delta: float) -> void:
 	if not _alive:
@@ -158,27 +163,32 @@ func _try_dash() -> void:
 	_dash_timer = dash_duration
 	_dash_cooldown_timer = dash_cooldown
 	_dash_hits.clear()
+	_dash_prev_origin = global_transform.origin
 
 func _apply_dash_hits() -> void:
 	var shape := SphereShape3D.new()
 	shape.radius = dash_hit_radius
 	var params := PhysicsShapeQueryParameters3D.new()
 	params.shape = shape
-	params.transform = global_transform
 	params.collide_with_areas = false
 	params.collide_with_bodies = true
 	params.exclude = [self]
-	var hits: Array[Dictionary] = get_world_3d().direct_space_state.intersect_shape(params, 24)
-	for hit_data: Dictionary in hits:
-		var collider_obj: Object = hit_data.get("collider") as Object
-		var enemy := collider_obj as EnemyUnit
-		if enemy:
-			var id := enemy.get_instance_id()
-			if _dash_hits.has(id):
-				continue
-			_dash_hits[id] = true
-			var push := (enemy.global_transform.origin - global_transform.origin).normalized()
-			enemy.take_damage(dash_damage, push * dash_knockback)
+	var samples := 5
+	for i in range(samples):
+		var t := float(i) / float(max(samples - 1, 1))
+		var probe_origin := _dash_prev_origin.lerp(global_transform.origin, t)
+		params.transform = Transform3D(Basis.IDENTITY, probe_origin)
+		var hits: Array[Dictionary] = get_world_3d().direct_space_state.intersect_shape(params, 24)
+		for hit_data: Dictionary in hits:
+			var collider_obj: Object = hit_data.get("collider") as Object
+			var enemy := collider_obj as EnemyUnit
+			if enemy:
+				var id := enemy.get_instance_id()
+				if _dash_hits.has(id):
+					continue
+				_dash_hits[id] = true
+				var push := (enemy.global_transform.origin - global_transform.origin).normalized()
+				enemy.take_damage(dash_damage, push * dash_knockback)
 
 func _try_stealth() -> void:
 	if _stealth_cooldown_timer > 0.0 or _stealth_timer > 0.0 or not _alive:
@@ -224,5 +234,6 @@ func _update_stealth_visuals() -> void:
 
 func _emit_cooldowns() -> void:
 	var dash_ratio := 1.0 - (_dash_cooldown_timer / dash_cooldown) if dash_cooldown > 0.0 else 1.0
+	var knife_ratio := 1.0 - (_knife_timer / knife_cooldown) if knife_cooldown > 0.0 else 1.0
 	var stealth_ratio := 1.0 - (_stealth_cooldown_timer / stealth_cooldown) if stealth_cooldown > 0.0 else 1.0
-	cooldowns_changed.emit(clamp(dash_ratio, 0.0, 1.0), clamp(stealth_ratio, 0.0, 1.0), is_stealthed())
+	cooldowns_changed.emit(clamp(dash_ratio, 0.0, 1.0), clamp(knife_ratio, 0.0, 1.0), clamp(stealth_ratio, 0.0, 1.0), is_stealthed())
