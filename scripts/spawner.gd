@@ -39,9 +39,9 @@ func _spawn_wave() -> void:
 	if alive >= max_alive:
 		return
 	var wave_bonus := int(_elapsed / wave_ramp_time)
-	var count: int = int(min(spawn_per_wave + wave_bonus, max_alive - alive))
-	for i in count:
-		var enemy := enemy_scene.instantiate() as EnemyUnit
+var count: int = int(min(spawn_per_wave + wave_bonus, max_alive - alive))
+for i in count:
+	var enemy := enemy_scene.instantiate() as EnemyUnit
 		if enemy == null:
 			continue
 		var pos := _pick_spawn_position()
