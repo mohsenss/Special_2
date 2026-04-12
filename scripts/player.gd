@@ -14,7 +14,7 @@ signal player_died
 @export var max_air_jumps: int = 1
 @export var mouse_sensitivity: float = 0.003
 
-@export var knife_damage: float = 36.0
+@export var knife_damage: float = 120.0
 @export var knife_range: float = 3.2
 @export var knife_radius: float = 2.1
 @export var knife_cooldown: float = 0.24
@@ -29,6 +29,7 @@ signal player_died
 
 @export var stealth_duration: float = 3.8
 @export var stealth_cooldown: float = 11.0
+@export var heal_on_kill: float = 8.0
 
 @onready var pivot: Node3D = $Pivot
 @onready var camera: Camera3D = $Pivot/Camera3D
@@ -46,6 +47,7 @@ var _knife_timer := 0.0
 var _dash_timer := 0.0
 var _dash_cooldown_timer := 0.0
 var _dash_hits: Dictionary = {}
+var _dash_key_was_down := false
 
 var _stealth_timer := 0.0
 var _stealth_cooldown_timer := 0.0
@@ -59,7 +61,7 @@ func _ready() -> void:
 	kill_count_changed.emit(kill_count)
 	_emit_cooldowns()
 
-func _unhandled_input(event: InputEvent) -> void:
+func _input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		_yaw -= event.relative.x * mouse_sensitivity
 		_pitch = clamp(_pitch - event.relative.y * mouse_sensitivity, deg_to_rad(-87), deg_to_rad(87))
@@ -67,12 +69,6 @@ func _unhandled_input(event: InputEvent) -> void:
 		pivot.rotation.x = _pitch
 	if event.is_action_pressed("ui_cancel"):
 		Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
-	if event.is_action_pressed("attack"):
-		_try_knife_attack()
-	if event.is_action_pressed("dash"):
-		_try_dash()
-	if event.is_action_pressed("stealth"):
-		_try_stealth()
 
 func _physics_process(delta: float) -> void:
 	if not _alive:
@@ -80,7 +76,16 @@ func _physics_process(delta: float) -> void:
 	_update_timers(delta)
 	_update_stealth_visuals()
 
-	var input_vec := Input.get_vector("move_left", "move_right", "move_forward", "move_backward")
+	if Input.is_action_just_pressed("attack"):
+		_try_knife_attack()
+	var shift_down := Input.is_key_pressed(KEY_SHIFT)
+	if Input.is_action_just_pressed("dash") or (shift_down and not _dash_key_was_down):
+		_try_dash()
+	_dash_key_was_down = shift_down
+	if Input.is_action_just_pressed("stealth"):
+		_try_stealth()
+
+	var input_vec := Input.get_vector("move_left", "move_right", "move_backward", "move_forward")
 	var forward := -transform.basis.z
 	var right := transform.basis.x
 	var desired_dir := (forward * input_vec.y + right * input_vec.x)
@@ -196,8 +201,13 @@ func take_damage(amount: float) -> void:
 		Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 
 func register_kill() -> void:
+	on_enemy_killed()
+
+func on_enemy_killed() -> void:
 	kill_count += 1
+	health = min(max_health, health + heal_on_kill)
 	kill_count_changed.emit(kill_count)
+	health_changed.emit(health, max_health)
 
 func _update_stealth_visuals() -> void:
 	var mat := body_mesh.material_override

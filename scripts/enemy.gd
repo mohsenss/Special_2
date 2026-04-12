@@ -49,7 +49,8 @@ func _physics_process(delta: float) -> void:
 		velocity.x = move_toward(velocity.x, dir.x * move_speed + _external_knockback.x, acceleration * delta)
 		velocity.z = move_toward(velocity.z, dir.z * move_speed + _external_knockback.z, acceleration * delta)
 		look_at(global_transform.origin + dir, Vector3.UP)
-		if dist <= 1.65 and _attack_cd <= 0.0:
+		var vertical_gap := abs(to_player.y)
+		if dist <= 1.65 and vertical_gap <= 1.1 and _attack_cd <= 0.0:
 			_attack_cd = attack_interval
 			target.take_damage(touch_damage)
 	_external_knockback = _external_knockback.move_toward(Vector3.ZERO, 24.0 * delta)
@@ -60,5 +61,5 @@ func take_damage(amount: float, knockback: Vector3 = Vector3.ZERO) -> void:
 	_external_knockback += Vector3(knockback.x, 0.0, knockback.z)
 	if health <= 0.0:
 		if target and is_instance_valid(target):
-			target.register_kill()
+			target.on_enemy_killed()
 		queue_free()
