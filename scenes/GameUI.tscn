@@ -32,6 +32,7 @@ layout_mode = 2
 size_flags_horizontal = 3
 max_value = 100.0
 value = 100.0
+show_percentage = false
 
 [node name="HealthLabel" type="Label" parent="HUD/Margin/TopRow"]
 layout_mode = 2
@@ -41,26 +42,69 @@ text = "HP: 100 / 100"
 layout_mode = 2
 text = "Kills: 0"
 
-[node name="AbilityRow" type="HBoxContainer" parent="HUD/Margin"]
+[node name="ScoreLabel" type="Label" parent="HUD/Margin/TopRow"]
 layout_mode = 2
-offset_top = 40.0
-theme_override_constants/separation = 12
+text = "Score: 0"
 
-[node name="DashCooldown" type="ProgressBar" parent="HUD/Margin/AbilityRow"]
+[node name="StealthStatusLabel" type="Label" parent="HUD/Margin/TopRow"]
 layout_mode = 2
-custom_minimum_size = Vector2(220, 18)
+text = "Stealth: OFF"
+
+[node name="TopRight" type="VBoxContainer" parent="HUD/Margin"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -190.0
+offset_right = -8.0
+theme_override_constants/separation = 3
+
+[node name="ZoneTimerLabel" type="Label" parent="HUD/Margin/TopRight"]
+layout_mode = 2
+text = "Zone: incoming"
+horizontal_alignment = 2
+
+[node name="ZoneProgressLabel" type="Label" parent="HUD/Margin/TopRight"]
+layout_mode = 2
+text = "Inside: 0.0s"
+horizontal_alignment = 2
+
+[node name="BottomCenter" type="CenterContainer" parent="HUD/Margin"]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -110.0
+offset_bottom = -30.0
+
+[node name="AbilityBars" type="HBoxContainer" parent="HUD/Margin/BottomCenter"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="DashCooldown" type="ProgressBar" parent="HUD/Margin/BottomCenter/AbilityBars"]
+layout_mode = 2
+custom_minimum_size = Vector2(130, 14)
 value = 100.0
 show_percentage = false
 
-[node name="StealthCooldown" type="ProgressBar" parent="HUD/Margin/AbilityRow"]
+[node name="KnifeCooldown" type="ProgressBar" parent="HUD/Margin/BottomCenter/AbilityBars"]
 layout_mode = 2
-custom_minimum_size = Vector2(220, 18)
+custom_minimum_size = Vector2(130, 14)
 value = 100.0
 show_percentage = false
 
-[node name="StealthState" type="Label" parent="HUD/Margin/AbilityRow"]
+[node name="StealthCooldown" type="ProgressBar" parent="HUD/Margin/BottomCenter/AbilityBars"]
 layout_mode = 2
-text = "Stealth Ready"
+custom_minimum_size = Vector2(130, 14)
+value = 100.0
+show_percentage = false
+
+[node name="AirJumpCooldown" type="ProgressBar" parent="HUD/Margin/BottomCenter/AbilityBars"]
+layout_mode = 2
+custom_minimum_size = Vector2(130, 14)
+value = 100.0
+show_percentage = false
 
 [node name="Crosshair" type="Label" parent="HUD"]
 layout_mode = 1
@@ -84,10 +128,11 @@ anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
 offset_left = 14.0
-offset_top = -128.0
-offset_right = 860.0
+offset_top = -72.0
+offset_right = 1140.0
 offset_bottom = -12.0
-text = "WASD Move | Mouse Look | LMB Knife (one-hit + multi-hit) | Shift Dash | E Stealth | Space Double Jump | R Restart"
+text = "WASD Move | Mouse Look | Hold LMB Knife | Shift Dash | E Stealth | Space Double Jump | R Restart"
+
 [node name="GameOver" type="PanelContainer" parent="."]
 visible = false
 anchors_preset = 8
