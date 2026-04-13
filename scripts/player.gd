@@ -133,6 +133,10 @@ func _physics_process(delta: float) -> void:
 		_apply_dash_hits()
 
 func _process(_delta: float) -> void:
+	if not _alive:
+		if Input.is_action_just_pressed("restart"):
+			get_tree().reload_current_scene()
+		return
 	if Input.mouse_mode == Input.MOUSE_MODE_VISIBLE and (Input.is_action_just_pressed("attack") or Input.is_action_just_pressed("rifle_fire")):
 		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 
