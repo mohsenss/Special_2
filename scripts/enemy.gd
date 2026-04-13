@@ -1,19 +1,22 @@
 extends CharacterBody3D
 class_name EnemyUnit
 
-@export var max_health: float = 60.0
+@export var max_health: float = 100.0
 @export var move_speed: float = 5.2
 @export var acceleration: float = 16.0
-@export var touch_damage: float = 8.0
-@export var attack_interval: float = 0.9
+@export var touch_damage: float = 11.0
+@export var attack_interval: float = 0.85
 @export var detection_range: float = 80.0
 @export var deaggro_range: float = 120.0
+@export var despawn_distance: float = 42.0
+@export var despawn_time: float = 4.0
 
 var health: float
 var gravity: float = float(ProjectSettings.get_setting("physics/3d/default_gravity"))
 var target: PlayerController
 var _attack_cd := 0.0
 var _external_knockback: Vector3 = Vector3.ZERO
+var _far_timer := 0.0
 
 func _ready() -> void:
 	health = max_health
@@ -43,6 +46,15 @@ func _physics_process(delta: float) -> void:
 	var planar: Vector3 = Vector3(to_player.x, 0.0, to_player.z)
 	var dist: float = planar.length()
 
+	if dist > despawn_distance:
+		_far_timer += delta
+		if _far_timer >= despawn_time:
+			_request_replacement()
+			queue_free()
+			return
+	else:
+		_far_timer = 0.0
+
 	if dist > deaggro_range:
 		queue_free()
 		return
@@ -68,3 +80,11 @@ func take_damage(amount: float, knockback: Vector3 = Vector3.ZERO) -> void:
 		if target and is_instance_valid(target):
 			target.register_kill()
 		queue_free()
+
+func _request_replacement() -> void:
+	var spawners := get_tree().get_nodes_in_group("enemy_spawner")
+	if spawners.is_empty():
+		return
+	var spawner := spawners[0] as EnemySpawner
+	if spawner:
+		spawner.request_replacement()
