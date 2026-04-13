@@ -3,7 +3,7 @@ class_name PlayerController
 
 signal health_changed(current: float, max_health: float)
 signal kill_count_changed(value: int)
-signal cooldowns_changed(dash_ratio: float, knife_ratio: float, stealth_ratio: float, stealth_active: bool)
+signal cooldowns_changed(dash_ratio: float, knife_ratio: float, stealth_ratio: float, is_stealthed_now: bool)
 signal player_died
 
 @export var max_health: float = 100.0
@@ -12,6 +12,7 @@ signal player_died
 @export var air_control: float = 0.45
 @export var jump_velocity: float = 10.5
 @export var max_air_jumps: int = 1
+@export var air_jump_cooldown: float = 10.0
 @export var mouse_sensitivity: float = 0.003
 
 @export var knife_damage: float = 34.0
@@ -19,6 +20,10 @@ signal player_died
 @export var knife_radius: float = 2.1
 @export var knife_cooldown: float = 0.24
 @export var knife_knockback: float = 8.5
+
+@export var rifle_damage: float = 34.0
+@export var rifle_fire_rate: float = 12.0
+@export var rifle_range: float = 180.0
 
 @export var dash_speed: float = 38.0
 @export var dash_duration: float = 0.18
@@ -38,14 +43,17 @@ signal player_died
 var gravity: float = float(ProjectSettings.get_setting("physics/3d/default_gravity"))
 var health: float
 var kill_count: int = 0
+var score: int = 0
 
 var _yaw := 0.0
 var _pitch := 0.0
 var _air_jumps_left := 0
 
 var _knife_timer := 0.0
+var _rifle_timer := 0.0
 var _dash_timer := 0.0
 var _dash_cooldown_timer := 0.0
+var _air_jump_cooldown_timer := 0.0
 var _dash_hits: Dictionary = {}
 var _dash_prev_origin: Vector3 = Vector3.ZERO
 var _dash_key_was_down := false
@@ -60,6 +68,7 @@ func _ready() -> void:
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 	health_changed.emit(health, max_health)
 	kill_count_changed.emit(kill_count)
+	score_changed.emit(score)
 	_emit_cooldowns()
 
 func _input(event: InputEvent) -> void:
@@ -79,6 +88,8 @@ func _physics_process(delta: float) -> void:
 
 	if Input.is_action_pressed("attack"):
 		_try_knife_attack()
+	if Input.is_action_pressed("rifle_fire"):
+		_try_rifle_fire()
 	var shift_down := Input.is_key_pressed(KEY_SHIFT)
 	if Input.is_action_just_pressed("dash") or (shift_down and not _dash_key_was_down):
 		_try_dash()
@@ -103,8 +114,9 @@ func _physics_process(delta: float) -> void:
 			velocity.y = jump_velocity
 	else:
 		velocity.y -= gravity * delta
-		if Input.is_action_just_pressed("jump") and _air_jumps_left > 0:
+		if Input.is_action_just_pressed("jump") and _air_jumps_left > 0 and _air_jump_cooldown_timer <= 0.0:
 			_air_jumps_left -= 1
+			_air_jump_cooldown_timer = air_jump_cooldown
 			velocity.y = jump_velocity * 0.95
 
 	if _dash_timer > 0.0:
@@ -119,18 +131,20 @@ func _physics_process(delta: float) -> void:
 	if _dash_timer > 0.0:
 		_apply_dash_hits()
 
-func _process(delta: float) -> void:
+func _process(_delta: float) -> void:
 	if not _alive:
 		if Input.is_action_just_pressed("restart"):
 			get_tree().reload_current_scene()
 		return
-	if Input.mouse_mode == Input.MOUSE_MODE_VISIBLE and Input.is_action_just_pressed("attack"):
+	if Input.mouse_mode == Input.MOUSE_MODE_VISIBLE and (Input.is_action_just_pressed("attack") or Input.is_action_just_pressed("rifle_fire")):
 		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 
 func _update_timers(delta: float) -> void:
 	_knife_timer = max(_knife_timer - delta, 0.0)
+	_rifle_timer = max(_rifle_timer - delta, 0.0)
 	_dash_timer = max(_dash_timer - delta, 0.0)
 	_dash_cooldown_timer = max(_dash_cooldown_timer - delta, 0.0)
+	_air_jump_cooldown_timer = max(_air_jump_cooldown_timer - delta, 0.0)
 	_stealth_timer = max(_stealth_timer - delta, 0.0)
 	_stealth_cooldown_timer = max(_stealth_cooldown_timer - delta, 0.0)
 	_emit_cooldowns()
@@ -156,6 +170,23 @@ func _try_knife_attack() -> void:
 			var to_target := enemy.global_transform.origin - global_transform.origin
 			if to_target.normalized().dot(-global_transform.basis.z) > 0.1:
 				enemy.take_damage(knife_damage, to_target.normalized() * knife_knockback)
+
+func _try_rifle_fire() -> void:
+	if _rifle_timer > 0.0 or not _alive:
+		return
+	_rifle_timer = 1.0 / rifle_fire_rate if rifle_fire_rate > 0.0 else 0.08
+	var from := camera.global_transform.origin
+	var to := from + (-camera.global_transform.basis.z * rifle_range)
+	var params := PhysicsRayQueryParameters3D.create(from, to)
+	params.collide_with_areas = false
+	params.collide_with_bodies = true
+	params.exclude = [self]
+	var result := get_world_3d().direct_space_state.intersect_ray(params)
+	if result.is_empty():
+		return
+	var enemy := result.get("collider") as EnemyUnit
+	if enemy:
+		enemy.take_damage(rifle_damage)
 
 func _try_dash() -> void:
 	if _dash_cooldown_timer > 0.0 or _dash_timer > 0.0 or not _alive:
@@ -219,6 +250,12 @@ func on_enemy_killed() -> void:
 	kill_count_changed.emit(kill_count)
 	health_changed.emit(health, max_health)
 
+func add_objective_points(amount: int) -> void:
+	if amount <= 0:
+		return
+	score += amount
+	score_changed.emit(score)
+
 func _update_stealth_visuals() -> void:
 	var mat := body_mesh.material_override
 	if mat == null:
@@ -236,4 +273,13 @@ func _emit_cooldowns() -> void:
 	var dash_ratio := 1.0 - (_dash_cooldown_timer / dash_cooldown) if dash_cooldown > 0.0 else 1.0
 	var knife_ratio := 1.0 - (_knife_timer / knife_cooldown) if knife_cooldown > 0.0 else 1.0
 	var stealth_ratio := 1.0 - (_stealth_cooldown_timer / stealth_cooldown) if stealth_cooldown > 0.0 else 1.0
-	cooldowns_changed.emit(clamp(dash_ratio, 0.0, 1.0), clamp(knife_ratio, 0.0, 1.0), clamp(stealth_ratio, 0.0, 1.0), is_stealthed())
+func _emit_cooldowns() -> void:
+	var dash_ratio := 1.0 - (_dash_cooldown_timer / dash_cooldown) if dash_cooldown > 0.0 else 1.0
+	var knife_ratio := 1.0 - (_knife_timer / knife_cooldown) if knife_cooldown > 0.0 else 1.0
+	var stealth_ratio := 1.0 - (_stealth_cooldown_timer / stealth_cooldown) if stealth_cooldown > 0.0 else 1.0
+	cooldowns_changed.emit(
+		clamp(dash_ratio, 0.0, 1.0),
+		clamp(knife_ratio, 0.0, 1.0),
+		clamp(stealth_ratio, 0.0, 1.0),
+		is_stealthed()
+	)

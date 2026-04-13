@@ -32,6 +32,7 @@ layout_mode = 2
 size_flags_horizontal = 3
 max_value = 100.0
 value = 100.0
+show_percentage = false
 
 [node name="HealthLabel" type="Label" parent="HUD/Margin/TopRow"]
 layout_mode = 2
@@ -41,10 +42,22 @@ text = "HP: 100 / 100"
 layout_mode = 2
 text = "Kills: 0"
 
-[node name="AbilityRow" type="HBoxContainer" parent="HUD/Margin"]
+[node name="ScoreLabel" type="Label" parent="HUD/Margin/TopRow"]
 layout_mode = 2
-offset_top = 40.0
-theme_override_constants/separation = 12
+text = "Score: 0"
+
+[node name="StealthStatusLabel" type="Label" parent="HUD/Margin/TopRow"]
+layout_mode = 2
+text = "Stealth: OFF"
+
+[node name="AbilityRow" type="VBoxContainer" parent="HUD/Margin"]
+layout_mode = 2
+offset_top = 42.0
+theme_override_constants/separation = 6
+
+[node name="DashLabel" type="Label" parent="HUD/Margin/AbilityRow"]
+layout_mode = 2
+text = "Dash"
 
 [node name="DashLabel" type="Label" parent="HUD/Margin/AbilityRow"]
 layout_mode = 2
@@ -76,9 +89,15 @@ custom_minimum_size = Vector2(180, 18)
 value = 100.0
 show_percentage = false
 
-[node name="StealthState" type="Label" parent="HUD/Margin/AbilityRow"]
+[node name="AirJumpLabel" type="Label" parent="HUD/Margin/AbilityRow"]
 layout_mode = 2
-text = "Stealth Ready"
+text = "Air Jump"
+
+[node name="AirJumpCooldown" type="ProgressBar" parent="HUD/Margin/AbilityRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(180, 18)
+value = 100.0
+show_percentage = false
 
 [node name="Crosshair" type="Label" parent="HUD"]
 layout_mode = 1
@@ -103,8 +122,9 @@ anchor_right = 0.5
 anchor_bottom = 1.0
 offset_left = 14.0
 offset_top = -128.0
-offset_right = 860.0
+offset_right = 1140.0
 offset_bottom = -12.0
+text = "WASD Move | Mouse Look | Hold LMB Knife | Shift Dash | E Stealth | Space Double Jump | R Restart"
 text = "WASD Move | Mouse Look | Hold LMB Knife | Shift Dash | E Stealth | Space Double Jump | R Restart"
 [node name="GameOver" type="PanelContainer" parent="."]
 visible = false
