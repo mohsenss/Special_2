@@ -19,7 +19,7 @@ func _ready() -> void:
 		ui.update_health(player.health, player.max_health)
 		ui.update_kills(player.kill_count)
 		ui.update_score(player.score)
-		ui.update_cooldowns(1.0, 1.0, 1.0, 1.0)
+		ui.update_cooldowns(1.0, 1.0, 1.0, false)
 
 func _on_player_died() -> void:
 	if ui:

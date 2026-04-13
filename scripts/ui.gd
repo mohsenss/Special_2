@@ -43,15 +43,7 @@ func update_score(value: int) -> void:
 	if score_label:
 		score_label.text = "Score: %d" % value
 
-func update_cooldowns(dash_ratio: float, knife_ratio: float, stealth_ratio: float, arg4 = 1.0, arg5 = null) -> void:
-	var air_jump_ratio := 1.0
-	var is_stealthed_now := false
-	if typeof(arg4) == TYPE_BOOL and arg5 == null:
-		is_stealthed_now = arg4
-	else:
-		air_jump_ratio = float(arg4)
-		if arg5 != null:
-			is_stealthed_now = bool(arg5)
+func update_cooldowns(dash_ratio: float, knife_ratio: float, stealth_ratio: float, is_stealthed_now: bool) -> void:
 	if dash_cd_bar:
 		dash_cd_bar.value = dash_ratio * 100.0
 	if knife_cd_bar:
@@ -59,7 +51,7 @@ func update_cooldowns(dash_ratio: float, knife_ratio: float, stealth_ratio: floa
 	if stealth_cd_bar:
 		stealth_cd_bar.value = stealth_ratio * 100.0
 	if air_jump_cd_bar:
-		air_jump_cd_bar.value = air_jump_ratio * 100.0
+		air_jump_cd_bar.value = 100.0
 	if stealth_status_label:
 		stealth_status_label.text = "Stealth: ON" if is_stealthed_now else "Stealth: OFF"
 
