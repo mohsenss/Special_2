@@ -3,7 +3,6 @@ class_name PlayerController
 
 signal health_changed(current: float, max_health: float)
 signal kill_count_changed(value: int)
-signal score_changed(value: int)
 signal cooldowns_changed(dash_ratio: float, knife_ratio: float, stealth_ratio: float, is_stealthed_now: bool)
 signal player_died
 
@@ -270,6 +269,10 @@ func _update_stealth_visuals() -> void:
 			std.albedo_color.a = 1.0
 			std.transparency = BaseMaterial3D.TRANSPARENCY_DISABLED
 
+func _emit_cooldowns() -> void:
+	var dash_ratio := 1.0 - (_dash_cooldown_timer / dash_cooldown) if dash_cooldown > 0.0 else 1.0
+	var knife_ratio := 1.0 - (_knife_timer / knife_cooldown) if knife_cooldown > 0.0 else 1.0
+	var stealth_ratio := 1.0 - (_stealth_cooldown_timer / stealth_cooldown) if stealth_cooldown > 0.0 else 1.0
 func _emit_cooldowns() -> void:
 	var dash_ratio := 1.0 - (_dash_cooldown_timer / dash_cooldown) if dash_cooldown > 0.0 else 1.0
 	var knife_ratio := 1.0 - (_knife_timer / knife_cooldown) if knife_cooldown > 0.0 else 1.0
