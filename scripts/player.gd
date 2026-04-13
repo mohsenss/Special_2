@@ -1,9 +1,11 @@
-extends CharacterBody3D
+
+	extends CharacterBody3D
 class_name PlayerController
 
 signal health_changed(current: float, max_health: float)
 signal kill_count_changed(value: int)
-signal cooldowns_changed(dash_ratio: float, knife_ratio: float, stealth_ratio: float, is_stealthed_now: bool)
+signal score_changed(value: int)
+signal cooldowns_changed(dash_ratio: float, knife_ratio: float, stealth_ratio: float, air_jump_ratio: float, is_stealthed_now: bool)
 signal player_died
 
 @export var max_health: float = 100.0
@@ -273,13 +275,11 @@ func _emit_cooldowns() -> void:
 	var dash_ratio := 1.0 - (_dash_cooldown_timer / dash_cooldown) if dash_cooldown > 0.0 else 1.0
 	var knife_ratio := 1.0 - (_knife_timer / knife_cooldown) if knife_cooldown > 0.0 else 1.0
 	var stealth_ratio := 1.0 - (_stealth_cooldown_timer / stealth_cooldown) if stealth_cooldown > 0.0 else 1.0
-func _emit_cooldowns() -> void:
-	var dash_ratio := 1.0 - (_dash_cooldown_timer / dash_cooldown) if dash_cooldown > 0.0 else 1.0
-	var knife_ratio := 1.0 - (_knife_timer / knife_cooldown) if knife_cooldown > 0.0 else 1.0
-	var stealth_ratio := 1.0 - (_stealth_cooldown_timer / stealth_cooldown) if stealth_cooldown > 0.0 else 1.0
+	var air_jump_ratio := 1.0 - (_air_jump_cooldown_timer / air_jump_cooldown) if air_jump_cooldown > 0.0 else 1.0
 	cooldowns_changed.emit(
 		clamp(dash_ratio, 0.0, 1.0),
 		clamp(knife_ratio, 0.0, 1.0),
 		clamp(stealth_ratio, 0.0, 1.0),
+		clamp(air_jump_ratio, 0.0, 1.0),
 		is_stealthed()
 	)
